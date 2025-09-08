@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img"
+  aria-labelledby="title desc">
+  <title id="title">FlickHut icon</title>
+  <desc id="desc">Colorful house icon with play triangle inside for a video site (no text).</desc>
+
+  <defs>
+    <!-- background rounded square gradient -->
+    <linearGradient id="bgGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#FFB66B" />
+      <stop offset="0.5" stop-color="#FF6B6B" />
+      <stop offset="1" stop-color="#7C4DFF" />
+    </linearGradient>
+
+    <!-- house body gradient -->
+    <linearGradient id="houseGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#FF6A3D" />
+      <stop offset="1" stop-color="#FF9A6A" />
+    </linearGradient>
+
+    <!-- play triangle gradient -->
+    <linearGradient id="playGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95" />
+      <stop offset="1" stop-color="#FFD7B0" stop-opacity="0.95" />
+    </linearGradient>
+
+    <!-- subtle inner shadow for depth -->
+    <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feOffset dx="0" dy="6" in="SourceAlpha" result="o" />
+      <feGaussianBlur in="o" stdDeviation="10" result="b" />
+      <feComposite in="b" in2="SourceAlpha" operator="out" result="c" />
+      <feColorMatrix in="c" type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 0.25" />
+    </filter>
+
+    <!-- rounded corner mask for house to keep play triangle neat -->
+    <clipPath id="houseClip">
+      <path d="M136 220 L256 144 L376 220 L376 356 A20 20 0 0 1 356 376 L156 376 A20 20 0 0 1 136 356 Z" />
+    </clipPath>
+  </defs>
+
+  <!-- background rounded square -->
+  <rect x="28" y="28" width="456" height="456" rx="70" ry="70" fill="url(#bgGrad)" />
+
+  <!-- outer glow -->
+  <g opacity="0.12">
+    <ellipse cx="256" cy="380" rx="160" ry="36" fill="#000" />
+  </g>
+
+  <!-- house roof -->
+  <path d="M112 220 L256 112 L400 220 L368 220 L256 148 L144 220 Z" fill="#3B2A20" />
+
+  <!-- house body with stroke and inner shadow -->
+  <g filter="url(#innerShadow)">
+    <path d="M140 228 L256 152 L372 228 L372 356 A22 22 0 0 1 350 378 L162 378 A22 22 0 0 1 140 356 Z"
+      fill="url(#houseGrad)" stroke="#3B2A20" stroke-width="8" stroke-linejoin="round" />
+  </g>
+
+  <!-- play triangle centered, clipped inside house body -->
+  <g clip-path="url(#houseClip)">
+    <!-- outer soft triangle (for subtle outline) -->
+    <path d="M220 234 L320 280 L220 326 Z" fill="rgba(0,0,0,0.06)" transform="translate(0,2)" />
+    <!-- main triangle -->
+    <path d="M228 236 L312 280 L228 324 Z" fill="url(#playGrad)" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="4"
+      stroke-linejoin="round" />
+    <!-- small highlight -->
+    <path d="M238 250 L302 280 L238 310 Z" fill="#FFFFFF" fill-opacity="0.12" />
+  </g>
+
+  <!-- subtle outline for crisp edges on small sizes -->
+  <path d="M140 228 L256 152 L372 228 L372 356 A22 22 0 0 1 350 378 L162 378 A22 22 0 0 1 140 356 Z" fill="none"
+    stroke="#000000" stroke-opacity="0.06" stroke-width="2" stroke-linejoin="round" />
+
+</svg>
