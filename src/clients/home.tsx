@@ -1,5 +1,6 @@
 "use client";
 
+import Aurora from "@/components/Aurora";
 import EpisodeModal from "@/components/EpisodeModal";
 import ResultCard from "@/components/ResultCard";
 import SearchForm from "@/components/SearchForm";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
 import { SearchResult } from "@/types";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface HomeClientProps {
   siteConfig: {
@@ -97,7 +99,7 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
     setTabs([{ name: "聚合", results: [] }]);
     setActiveTab(0);
 
-    setStatusMessage("🔍 正在努力搜索中，请稍候...");
+    // toast("🔍 正在努力搜索中，请稍候...");
     setIsStatusVisible(true);
 
     // 使用新的API路由
@@ -153,7 +155,7 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
     };
 
     newEventSource.onerror = () => {
-      setStatusMessage("搜索完成");
+      toast("搜索完成");
       setTimeout(() => {
         setIsStatusVisible(false);
       }, 2000);
@@ -163,7 +165,7 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
 
   const showEpisodes = (item: SearchResult) => {
     if (!item.videos || item.videos.length === 0) {
-      setStatusMessage("该项目没有可播放的视频源");
+      toast("该项目没有可播放的视频源");
       setIsStatusVisible(true);
       setTimeout(() => {
         setIsStatusVisible(false);
@@ -207,65 +209,69 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
   }, [eventSource]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <SearchForm onSearch={startSearch} />
+    <div className="w-screen h-screen">
+      <Aurora colorStops={["#7cff67", "#b19eef", "#5227ff"]} />
 
-      {isStatusVisible && (
-        <div
-          id="status"
-          className="fixed top-3 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-50 text-lg font-medium whitespace-nowrap"
-        >
-          {statusMessage}
-        </div>
-      )}
+      <div className="absolute inset-0">
+        <SearchForm onSearch={startSearch} />
 
-      {tabs.length > 1 && (
-        <div className="tabs-nav mb-5 overflow-x-auto pb-2">
-          <div className="tabs-container flex">
-            {tabs.map((tab, index) => (
-              <Button
-                key={tab.name}
-                onClick={() => setActiveTab(index)}
-                variant={activeTab === index ? "default" : "outline"}
-                className="mr-2 mb-2 whitespace-nowrap"
-              >
-                {tab.name}
-              </Button>
-            ))}
+        {isStatusVisible && (
+          <div
+            id="status"
+            className="fixed top-3 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-50 text-lg font-medium whitespace-nowrap"
+          >
+            {statusMessage}
           </div>
-        </div>
-      )}
+        )}
 
-      {tabs.map((tab, index) => (
-        <div
-          key={tab.name}
-          style={{ display: activeTab === index ? "block" : "none" }}
-        >
-          <div className="results-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-5">
-            {tab.results.map((item) => (
-              <ResultCard
-                key={`${item.name}-${item.source_name}`}
-                item={item}
-                onClick={showEpisodes}
-              />
-            ))}
+        {tabs.length > 1 && (
+          <div className="tabs-nav mb-5 overflow-x-auto pb-2">
+            <div className="tabs-container flex">
+              {tabs.map((tab, index) => (
+                <Button
+                  key={tab.name}
+                  onClick={() => setActiveTab(index)}
+                  variant={activeTab === index ? "default" : "outline"}
+                  className="mr-2 mb-2 whitespace-nowrap"
+                >
+                  {tab.name}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        )}
 
-      <EpisodeModal
-        isVisible={episodesModalVisible}
-        selectedItem={selectedItemForEpisodes}
-        onClose={closeEpisodesModal}
-        onPlay={playVideo}
-      />
+        {tabs.map((tab, index) => (
+          <div
+            key={tab.name}
+            style={{ display: activeTab === index ? "block" : "none" }}
+          >
+            <div className="results-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-5">
+              {tab.results.map((item) => (
+                <ResultCard
+                  key={`${item.name}-${item.source_name}`}
+                  item={item}
+                  onClick={showEpisodes}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
 
-      <VideoPlayer
-        url={videoUrl}
-        title={videoTitle}
-        isVisible={modalVisible}
-        onClose={closeVideoModal}
-      />
+        <EpisodeModal
+          isVisible={episodesModalVisible}
+          selectedItem={selectedItemForEpisodes}
+          onClose={closeEpisodesModal}
+          onPlay={playVideo}
+        />
+
+        <VideoPlayer
+          url={videoUrl}
+          title={videoTitle}
+          isVisible={modalVisible}
+          onClose={closeVideoModal}
+        />
+      </div>
     </div>
   );
 }
