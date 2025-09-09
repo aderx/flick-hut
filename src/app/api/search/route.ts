@@ -1,5 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { getConfig } from "./config";
+import { NextResponse } from "next/server";
+import { getConfig } from "../config/route";
 
 interface Video {
   name: string;
@@ -60,7 +60,7 @@ async function fetchAndProcess(
   source: any,
   keyword: string,
   timeout: number,
-  res: NextApiResponse
+  stream: WritableStreamDefaultWriter
 ): Promise<void> {
   const url = `${source.base_url}?ac=detail&wd=${encodeURIComponent(keyword)}`;
   const name = source.name;
@@ -83,7 +83,9 @@ async function fetchAndProcess(
       console.log(`成功: ${name}`);
       const result = parseCmsData(name, data.list);
       // 通过SSE发送结果
-      res.write(`data: ${JSON.stringify(result)}\n\n`);
+      const dataString = `data: ${JSON.stringify(result)}\n\n`;
+      const encoder = new TextEncoder();
+      await stream.write(encoder.encode(dataString));
     } else {
       console.log(`数据为空或格式错误: ${name}, message: ${data.msg}`);
     }
@@ -92,65 +94,66 @@ async function fetchAndProcess(
   }
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { keyword } = req.query;
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const keyword = searchParams.get("keyword");
 
-  if (!keyword || typeof keyword !== "string") {
-    res.status(400).json({ error: "keyword is required" });
-    return;
+  if (!keyword) {
+    return NextResponse.json({ error: "keyword is required" }, { status: 400 });
   }
 
-  // 设置CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  // 创建可读流
+  const stream = new TransformStream();
+  const writer = stream.writable.getWriter();
+  const encoder = new TextEncoder();
 
-  // 处理预检请求
-  if (req.method === "OPTIONS") {
-    res.status(204).end();
-    return;
-  }
+  // 设置响应头
+  const headers = {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
 
-  if (req.method !== "GET") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
-  }
+  // 异步处理搜索请求
+  (async () => {
+    try {
+      const config = getConfig();
+      const sources = config.base_urls;
+      const timeout = config.timeout;
 
-  // 设置SSE响应头
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
+      // 并行处理所有源
+      const promises = sources.map((source) =>
+        fetchAndProcess(source, keyword, timeout, writer)
+      );
 
-  const config = getConfig();
-  const sources = config.base_urls;
-  const timeout = config.timeout;
+      await Promise.all(promises);
 
-  try {
-    // 并行处理所有源
-    const promises = sources.map((source) =>
-      fetchAndProcess(source, keyword, timeout, res)
-    );
+      // 结束响应
+      await writer.close();
+    } catch (error) {
+      console.error("Search error:", error);
+      const errorString = `data: ${JSON.stringify({
+        error: "搜索过程中发生错误",
+      })}\n\n`;
+      await writer.write(encoder.encode(errorString));
+      await writer.close();
+    }
+  })();
 
-    await Promise.all(promises);
-
-    // 结束响应
-    res.end();
-  } catch (error) {
-    console.error("Search error:", error);
-    res.write(`data: ${JSON.stringify({ error: "搜索过程中发生错误" })}\n\n`);
-    res.end();
-  }
+  return new NextResponse(stream.readable, { headers });
 }
 
-// 禁用默认的body parser，以便支持流式响应
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// 处理预检请求
+export async function OPTIONS() {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Content-Length": "0",
+  };
+
+  return new NextResponse(null, { status: 204, headers });
+}

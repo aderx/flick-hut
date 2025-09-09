@@ -34,12 +34,12 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
   // 设置背景图片URL
-  const backgroundImageUrl =
-    typeof window !== "undefined"
-      ? window.innerWidth <= 768
-        ? siteConfig.phone_background_image_url
-        : siteConfig.pc_background_image_url
-      : siteConfig.pc_background_image_url;
+  // const backgroundImageUrl =
+  //   typeof window !== "undefined"
+  //     ? window.innerWidth <= 768
+  //       ? siteConfig.phone_background_image_url
+  //       : siteConfig.pc_background_image_url
+  //     : siteConfig.pc_background_image_url;
 
   // Helper function to get video resolution
   const getVideoResolution = async (url: string): Promise<string> => {
