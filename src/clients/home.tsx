@@ -6,18 +6,14 @@ import ResultCard from "@/components/ResultCard";
 import SearchForm from "@/components/SearchForm";
 import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
-import { SearchResult } from "@/types";
+import { fetchApi } from "@/lib/service";
+import { useSearchStore } from "@/store/search";
+import { SearchResult, SiteConfig } from "@/types";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-interface HomeClientProps {
-  siteConfig: {
-    phone_background_image_url: string;
-    pc_background_image_url: string;
-  };
-}
-
-export default function HomeClient({ siteConfig }: HomeClientProps) {
+export default function HomeClient() {
+  const { updateSearchPlatformList } = useSearchStore();
   const [isBlurred, setIsBlurred] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [isStatusVisible, setIsStatusVisible] = useState(false);
@@ -33,13 +29,19 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
   const [videoTitle, setVideoTitle] = useState("");
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
-  // 设置背景图片URL
-  // const backgroundImageUrl =
-  //   typeof window !== "undefined"
-  //     ? window.innerWidth <= 768
-  //       ? siteConfig.phone_background_image_url
-  //       : siteConfig.pc_background_image_url
-  //     : siteConfig.pc_background_image_url;
+  useEffect(() => {
+    handleInit();
+  }, []);
+
+  const handleInit = async () => {
+    try {
+      const { base_urls } = await fetchApi<SiteConfig>("/api/config");
+
+      updateSearchPlatformList(base_urls);
+    } catch (e) {
+      toast.error((e as any)?.message || e);
+    }
+  };
 
   // Helper function to get video resolution
   const getVideoResolution = async (url: string): Promise<string> => {
@@ -97,6 +99,7 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
 
     // Always start with an aggregated tab
     setTabs([{ name: "聚合", results: [] }]);
+    // updateSearchPlatformList([{ name: "聚合", results: [] }]);
     setActiveTab(0);
 
     // toast("🔍 正在努力搜索中，请稍候...");
@@ -215,14 +218,14 @@ export default function HomeClient({ siteConfig }: HomeClientProps) {
       <div className="absolute inset-0">
         <SearchForm onSearch={startSearch} />
 
-        {isStatusVisible && (
+        {/* {isStatusVisible && (
           <div
             id="status"
             className="fixed top-3 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-50 text-lg font-medium whitespace-nowrap"
           >
             {statusMessage}
           </div>
-        )}
+        )} */}
 
         {tabs.length > 1 && (
           <div className="tabs-nav mb-5 overflow-x-auto pb-2">

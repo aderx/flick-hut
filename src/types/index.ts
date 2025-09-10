@@ -13,12 +13,7 @@ export interface SearchResult {
 
 export interface SiteConfig {
   site_name: string;
-  pc_background_image_url: string;
-  phone_background_image_url: string;
-}
-
-export interface HomeProps {
-  siteConfig: SiteConfig;
+  base_urls: { name: string; code: string }[];
 }
 
 export interface SearchFormProps {

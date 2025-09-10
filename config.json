@@ -1,95 +1,115 @@
 {
   "site_name": "Flick Hut",
-  "pc_background_image_url": "https://img.qlqqs.com/random",
-  "phone_background_image_url": "https://img.qlqqs.com/random",
   "timeout": 5,
   "base_urls": [
     {
       "name": "电影天堂资源",
+      "code": "dytt",
       "base_url": "http://caiji.dyttzyapi.com/api.php/provide/vod/from/dyttm3u8/at/json"
     },
     {
       "name": "黑木耳",
+      "code": "heimuer",
       "base_url": "https://json.heimuer.xyz/api.php/provide/vod"
     },
     {
       "name": "如意资源",
+      "code": "ryzy",
       "base_url": "http://cj.rycjapi.com/api.php/provide/vod"
     },
     {
       "name": "暴风资源",
+      "code": "bfzy",
       "base_url": "https://bfzyapi.com/api.php/provide/vod"
     },
     {
       "name": "天涯资源",
+      "code": "tyzy",
       "base_url": "https://tyyszy.com/api.php/provide/vod"
     },
     {
       "name": "非凡影视",
+      "code": "ffzy",
       "base_url": "http://ffzy5.tv/api.php/provide/vod/from/ffm3u8/at/json"
     },
     {
       "name": "360资源",
+      "code": "360zy",
       "base_url": "https://360zy.com/api.php/provide/vod"
     },
     {
       "name": "茅台资源",
+      "code": "mtzy",
       "base_url": "https://caiji.maotaizy.cc/api.php/provide/vod"
     },
     {
       "name": "卧龙资源",
+      "code": "wlzy",
       "base_url": "https://wolongzyw.com/api.php/provide/vod"
     },
     {
       "name": "极速资源",
+      "code": "jszy",
       "base_url": "https://jszyapi.com/api.php/provide/vod"
     },
     {
       "name": "豆瓣资源",
+      "code": "dbzy",
       "base_url": "https://dbzy.tv/api.php/provide/vod"
     },
     {
       "name": "魔爪资源",
+      "code": "mzyz",
       "base_url": "https://mozhuazy.com/api.php/provide/vod"
     },
     {
       "name": "魔都资源",
+      "code": "mdzy",
       "base_url": "https://www.mdzyapi.com/api.php/provide/vod"
     },
     {
       "name": "最大资源",
+      "code": "zdzy",
       "base_url": "https://api.zuidapi.com/api.php/provide/vod"
     },
     {
       "name": "樱花资源",
+      "code": "yzy",
       "base_url": "https://m3u8.apiyhzy.com/api.php/provide/vod"
     },
     {
       "name": "无尽资源",
+      "code": "wjzy",
       "base_url": "https://api.wujinapi.me/api.php/provide/vod"
     },
     {
       "name": "旺旺短剧",
+      "code": "wwzy",
       "base_url": "https://wwzy.tv/api.php/provide/vod"
     },
     {
       "name": "iKun资源",
+      "code": "ikunzy",
       "base_url": "https://ikunzyapi.com/api.php/provide/vod"
     },
     {
       "name": "量子资源站",
+      "code": "lzzyz",
       "base_url": "https://cj.lziapi.com/api.php/provide/vod"
     },
     {
       "name": "小猫咪资源",
+      "code": "xmmzy",
       "base_url": "https://zy.xmm.hk/api.php/provide/vod"
     },
     {
       "name": "索尼资源",
+      "code": "sonyzy",
       "base_url": "https://suoniapi.com/api.php/provide/vod"
     },
     {
       "name": "量子资源",
+      "code": "lzzy",
       "base_url": "http://cj.lziapi.com/api.php/provide/vod"
     }
   ]
