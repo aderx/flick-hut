@@ -11,6 +11,10 @@ interface SearchStore {
 
 export const useSearchStore = create<SearchStore>((set) => ({
   searchPlatformList: [],
-  updateSearchPlatformList: (list) => set({ searchPlatformList: list }),
+  updateSearchPlatformList: (list) =>
+    set({
+      searchPlatformList: list,
+      selectedPlatform: list.length > 0 ? list[0].code : undefined,
+    }),
   setSelectedPlatform: (platform) => set({ selectedPlatform: platform }),
 }));

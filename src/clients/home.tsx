@@ -2,6 +2,8 @@
 
 import Aurora from "@/components/Aurora";
 import EpisodeModal from "@/components/EpisodeModal";
+import { Header } from "@/components/Header";
+import { PlatformList } from "@/components/PlatformList";
 import ResultCard from "@/components/ResultCard";
 import SearchForm from "@/components/SearchForm";
 import { Button } from "@/components/ui/button";
@@ -15,7 +17,6 @@ import { toast } from "sonner";
 export default function HomeClient() {
   const { updateSearchPlatformList } = useSearchStore();
   const [isBlurred, setIsBlurred] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
   const [isStatusVisible, setIsStatusVisible] = useState(false);
   const [tabs, setTabs] = useState<
     Array<{ name: string; results: SearchResult[] }>
@@ -37,7 +38,10 @@ export default function HomeClient() {
     try {
       const { base_urls } = await fetchApi<SiteConfig>("/api/config");
 
-      updateSearchPlatformList(base_urls);
+      updateSearchPlatformList([
+        { name: "聚合", code: "_UNION_" },
+        ...base_urls,
+      ]);
     } catch (e) {
       toast.error((e as any)?.message || e);
     }
@@ -216,7 +220,9 @@ export default function HomeClient() {
       <Aurora colorStops={["#7cff67", "#b19eef", "#5227ff"]} />
 
       <div className="absolute inset-0">
+        <Header />
         <SearchForm onSearch={startSearch} />
+        <PlatformList />
 
         {/* {isStatusVisible && (
           <div
@@ -226,23 +232,6 @@ export default function HomeClient() {
             {statusMessage}
           </div>
         )} */}
-
-        {tabs.length > 1 && (
-          <div className="tabs-nav mb-5 overflow-x-auto pb-2">
-            <div className="tabs-container flex">
-              {tabs.map((tab, index) => (
-                <Button
-                  key={tab.name}
-                  onClick={() => setActiveTab(index)}
-                  variant={activeTab === index ? "default" : "outline"}
-                  className="mr-2 mb-2 whitespace-nowrap"
-                >
-                  {tab.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {tabs.map((tab, index) => (
           <div

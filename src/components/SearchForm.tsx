@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchFormProps } from "@/types";
 import { toast } from "sonner";
+import { Avatar, AvatarImage } from "./ui/avatar";
+import { AvatarFallback } from "@radix-ui/react-avatar";
+import { LucideCircleUserRound } from "lucide-react";
 
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   const [keyword, setKeyword] = useState("");
@@ -21,18 +24,19 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="mx-20 my-10 flex gap-10">
-      <div className="rounded-full bg-white/5 flex-1">
-        <Input
-          type="text"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          placeholder="请输入关键词..."
-          className="h-14 md:text-xl rounded-full px-5 bg-transparent"
-        />
-      </div>
+    <div className="mx-10 my-5 flex gap-5">
+      <Input
+        type="text"
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
+        placeholder="请输入关键词..."
+        className="h-14 md:text-xl rounded-full px-5"
+      />
 
-      <Button className="h-14 rounded-full w-20 text-xl" onClick={handleSubmit}>
+      <Button
+        className="h-13 rounded-full w-20 text-xl cursor-pointer"
+        onClick={handleSubmit}
+      >
         搜索
       </Button>
     </div>
