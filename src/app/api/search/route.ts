@@ -1,32 +1,27 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "../config/route";
+import { SourceData } from "@/types";
+import { SiteBasePlatformListItem, SiteConfig } from "@/types/config";
 
 interface Video {
   name: string;
   video_url: string;
 }
 
-interface SearchResult {
-  name: string;
-  vod_pic: string;
-  videos: Video[];
-}
-
-interface SourceData {
-  name: string;
-  result: SearchResult[];
-}
-
 // 解析CMS数据
-function parseCmsData(sourceName: string, cmsList: any[]): SourceData {
-  const results: SearchResult[] = [];
+function parseCmsData(
+  sourceName: string,
+  sourceCode: string,
+  cmsList: any[]
+): SourceData {
+  const results: SourceData["videoList"] = [];
 
   for (const item of cmsList) {
     // vod_play_url 的格式通常是 '播放源1$$$播放源2'
     // 我们只取第一个播放源
     const playUrlsStr = item.vod_play_url?.split("$$$")[0] || "";
 
-    const videos: Video[] = [];
+    const source: Video[] = [];
     // 视频列表以 '#' 分割
     const episodes = playUrlsStr.split("#");
     for (const episode of episodes) {
@@ -35,41 +30,41 @@ function parseCmsData(sourceName: string, cmsList: any[]): SourceData {
       if (parts.length === 2) {
         const videoName = parts[0];
         const videoUrl = parts[1];
-        videos.push({ name: videoName, video_url: videoUrl });
+        source.push({ name: videoName, video_url: videoUrl });
       }
     }
 
     // 只有当成功解析出视频时才添加该条目
-    if (videos.length > 0) {
+    if (source.length > 0) {
       results.push({
-        name: item.vod_name || "未知名称",
-        vod_pic: item.vod_pic || "",
-        videos: videos,
+        ...item,
+        source: source,
       });
     }
   }
 
   return {
     name: sourceName,
-    result: results,
+    code: sourceCode,
+    videoList: results,
   };
 }
 
 // 获取并处理单个API源的数据
 async function fetchAndProcess(
-  source: any,
+  source: SiteBasePlatformListItem,
   keyword: string,
   timeout: number,
   stream: WritableStreamDefaultWriter
 ): Promise<void> {
-  const url = `${source.base_url}?ac=detail&wd=${encodeURIComponent(keyword)}`;
-  const name = source.name;
+  const { name, code, url } = source;
+  const sourceUrl = `${url}?ac=detail&wd=${encodeURIComponent(keyword)}`;
 
   try {
-    console.log(`开始搜索: ${name} -> ${url}`);
+    // console.log(`开始搜索: ${name} -> ${url}`);
 
     // 设置超时
-    const response = await fetch(url, {
+    const response = await fetch(sourceUrl, {
       signal: AbortSignal.timeout(timeout * 1000),
       headers: {
         "User-Agent":
@@ -81,7 +76,7 @@ async function fetchAndProcess(
 
     if (data.code === 1 && data.list && data.list.length > 0) {
       console.log(`成功: ${name}`);
-      const result = parseCmsData(name, data.list);
+      const result = parseCmsData(name, code, data.list);
       // 通过SSE发送结果
       const dataString = `data: ${JSON.stringify(result)}\n\n`;
       const encoder = new TextEncoder();
@@ -121,12 +116,12 @@ export async function GET(request: Request) {
   (async () => {
     try {
       const config = getConfig();
-      const sources = config.base_urls;
+      const sources = config.platformList;
       const timeout = config.timeout;
 
       // 并行处理所有源
       const promises = sources.map((source) =>
-        fetchAndProcess(source, keyword, timeout, writer)
+        fetchAndProcess(source, keyword, timeout || 5, writer)
       );
 
       await Promise.all(promises);

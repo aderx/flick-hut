@@ -3,28 +3,25 @@
 import Aurora from "@/components/Aurora";
 import EpisodeModal from "@/components/EpisodeModal";
 import { Header } from "@/components/Header";
+import { MoveList } from "@/components/MoveList";
 import { PlatformList } from "@/components/PlatformList";
 import ResultCard from "@/components/ResultCard";
 import SearchForm from "@/components/SearchForm";
-import { Button } from "@/components/ui/button";
 import VideoPlayer from "@/components/VideoPlayer";
 import { fetchApi } from "@/lib/service";
+import { useMovieStore } from "@/store/movie";
 import { useSearchStore } from "@/store/search";
-import { SearchResult, SiteConfig } from "@/types";
+import { SearchVideoListItem } from "@/types";
+import { SiteConfig } from "@/types/config";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function HomeClient() {
   const { updateSearchPlatformList } = useSearchStore();
-  const [isBlurred, setIsBlurred] = useState(false);
-  const [isStatusVisible, setIsStatusVisible] = useState(false);
-  const [tabs, setTabs] = useState<
-    Array<{ name: string; results: SearchResult[] }>
-  >([]);
-  const [activeTab, setActiveTab] = useState(0);
+  const { setMovieList } = useMovieStore();
   const [episodesModalVisible, setEpisodesModalVisible] = useState(false);
   const [selectedItemForEpisodes, setSelectedItemForEpisodes] =
-    useState<SearchResult | null>(null);
+    useState<SearchVideoListItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
@@ -44,72 +41,14 @@ export default function HomeClient() {
     }
   };
 
-  // Helper function to get video resolution
-  const getVideoResolution = async (url: string): Promise<string> => {
-    const lowerCaseUrl = url.toLowerCase();
-    if (lowerCaseUrl.endsWith(".m3u8")) {
-      try {
-        const response = await fetch(url);
-        if (!response.ok) return "未知";
-        const manifest = await response.text();
-        const lines = manifest.split("\n");
-        let bestResolution = { width: 0, height: 0 };
-        for (const line of lines) {
-          if (line.includes("RESOLUTION=")) {
-            const match = line.match(/RESOLUTION=(\d+)x(\d+)/);
-            if (match) {
-              const width = parseInt(match[1], 10);
-              const height = parseInt(match[2], 10);
-              if (
-                width * height >
-                bestResolution.width * bestResolution.height
-              ) {
-                bestResolution = { width, height };
-              }
-            }
-          }
-        }
-        return bestResolution.width > 0 ? `${bestResolution.height}P` : "未知";
-      } catch (error) {
-        console.error("Failed to parse M3U8 for resolution:", url, error);
-        return "获取失败";
-      }
-    } else if (lowerCaseUrl.endsWith(".mp4")) {
-      return new Promise((resolve) => {
-        const video = document.createElement("video");
-        video.preload = "metadata";
-        video.onloadedmetadata = () => {
-          resolve(`${video.videoHeight}P`);
-          video.remove();
-        };
-        video.onerror = () => {
-          resolve("获取失败");
-          video.remove();
-        };
-        video.src = url;
-      });
-    } else {
-      return "不支持";
-    }
-  };
-
   const startSearch = (keyword: string) => {
     if (eventSource) {
       eventSource.close();
     }
 
-    // Always start with an aggregated tab
-    setTabs([{ name: "聚合", results: [] }]);
-    // updateSearchPlatformList([{ name: "聚合", results: [] }]);
-    setActiveTab(0);
-
-    // toast("🔍 正在努力搜索中，请稍候...");
-    setIsStatusVisible(true);
-
     // 使用新的API路由
     const url = `/api/search?keyword=${encodeURIComponent(keyword)}`;
     const newEventSource = new EventSource(url);
-    setIsBlurred(true);
     setEventSource(newEventSource);
 
     newEventSource.onmessage = async (event) => {
@@ -118,62 +57,31 @@ export default function HomeClient() {
         return;
       }
 
-      // Add source name to each item for the aggregated view
-      const processedResults = await Promise.all(
-        sourceData.result.map(async (item: SearchResult) => {
-          item.source_name = sourceData.name; // Keep track of original source
-          item.resolution = "加载中...";
-          if (item.videos && item.videos.length > 0) {
-            item.resolution = await getVideoResolution(
-              item.videos[0].video_url
-            );
-          } else {
-            item.resolution = "无视频源";
-          }
-          return item;
-        })
+      const { name, result } = sourceData;
+
+      setMovieList(
+        result.map((item: SearchVideoListItem) => ({
+          name: item.name,
+          coverUrl: item.vod_pic,
+          list: item.videos,
+          platform: name,
+        }))
       );
-
-      // Update state with new results
-      setTabs((prevTabs) => {
-        // Add results to the aggregated tab (index 0)
-        const updatedTabs = [...prevTabs];
-        updatedTabs[0] = {
-          ...updatedTabs[0],
-          results: [...updatedTabs[0].results, ...processedResults],
-        };
-
-        // Add results to their own source-specific tab
-        const sourceTabIndex = updatedTabs.findIndex(
-          (tab) => tab.name === sourceData.name
-        );
-        if (sourceTabIndex === -1) {
-          updatedTabs.push({
-            name: sourceData.name,
-            results: processedResults,
-          });
-        }
-
-        return updatedTabs;
-      });
     };
 
     newEventSource.onerror = () => {
       toast("搜索完成");
-      setTimeout(() => {
-        setIsStatusVisible(false);
-      }, 2000);
       newEventSource.close();
     };
   };
 
-  const showEpisodes = (item: SearchResult) => {
+  const showEpisodes = (item: SearchVideoListItem) => {
     if (!item.videos || item.videos.length === 0) {
       toast("该项目没有可播放的视频源");
-      setIsStatusVisible(true);
-      setTimeout(() => {
-        setIsStatusVisible(false);
-      }, 2000);
+      // setIsStatusVisible(true);
+      // setTimeout(() => {
+      //   setIsStatusVisible(false);
+      // }, 2000);
       return;
     }
     setSelectedItemForEpisodes(item);
@@ -200,8 +108,6 @@ export default function HomeClient() {
 
   const closeVideoModal = () => {
     setModalVisible(false);
-    const closeBtn = document.getElementById("closeModal");
-    if (closeBtn) closeBtn.style.display = "none";
   };
 
   useEffect(() => {
@@ -220,26 +126,7 @@ export default function HomeClient() {
         <Header />
         <SearchForm onSearch={startSearch} />
         <PlatformList />
-
-        {tabs.map((tab, index) => (
-          <div
-            key={tab.name}
-            style={{ display: activeTab === index ? "block" : "none" }}
-          >
-            <div
-              key={tab.name}
-              className="overflow-hidden px-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-10"
-            >
-              {tab.results.map((item) => (
-                <ResultCard
-                  key={`${item.name}-${item.source_name}`}
-                  item={item}
-                  onClick={showEpisodes}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+        <MoveList />
 
         <EpisodeModal
           isVisible={episodesModalVisible}

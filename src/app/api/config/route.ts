@@ -1,20 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-
-// 定义数据结构
-interface BaseUrlItem {
-  name: string;
-  base_url: string;
-}
-
-interface SiteConfig {
-  site_name: string;
-  pc_background_image_url: string;
-  phone_background_image_url: string;
-  timeout: number;
-  base_urls: BaseUrlItem[];
-}
+import { SiteConfig } from "@/types/config";
 
 // 读取配置文件
 export function getConfig(): SiteConfig {
@@ -65,6 +52,6 @@ export async function OPTIONS() {
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Content-Length": "0",
   };
-  
+
   return new NextResponse(null, { status: 204, headers });
 }

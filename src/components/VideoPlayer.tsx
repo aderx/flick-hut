@@ -1,8 +1,19 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { VideoPlayerProps } from '@/types';
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, isVisible, onClose }) => {
+interface VideoPlayerProps {
+  url: string;
+  title: string;
+  isVisible: boolean;
+  onClose: () => void;
+}
+
+const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  url,
+  title,
+  isVisible,
+  onClose,
+}) => {
   const artRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -11,8 +22,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, isVisible, onClos
       if (!isVisible || !url || !containerRef.current) return;
 
       // 动态导入ArtPlayer以避免SSR问题
-      const Artplayer = (await import('artplayer')).default;
-      const Hls = (await import('hls.js')).default;
+      const Artplayer = (await import("artplayer")).default;
+      const Hls = (await import("hls.js")).default;
 
       const playM3u8 = (video: HTMLVideoElement, url: string, art: any) => {
         if (Hls.isSupported()) {
@@ -21,11 +32,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, isVisible, onClos
           hls.loadSource(url);
           hls.attachMedia(video);
           art.hls = hls;
-          art.on('destroy', () => hls.destroy());
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          art.on("destroy", () => hls.destroy());
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
           video.src = url;
         } else {
-          art.notice.show = 'Unsupported playback format: m3u8';
+          art.notice.show = "Unsupported playback format: m3u8";
         }
       };
 
@@ -44,16 +55,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, isVisible, onClos
       };
 
       const lowerCaseUrl = url.toLowerCase();
-      if (lowerCaseUrl.endsWith('.m3u8')) {
-        options.type = 'm3u8';
+      if (lowerCaseUrl.endsWith(".m3u8")) {
+        options.type = "m3u8";
         options.customType = { m3u8: playM3u8 };
       }
 
       artRef.current = new (Artplayer as any)(options);
 
-      artRef.current.on('ready', () => {
-        const closeBtn = document.getElementById('closeModal');
-        if (closeBtn) closeBtn.style.display = 'none';
+      artRef.current.on("ready", () => {
+        const closeBtn = document.getElementById("closeModal");
+        if (closeBtn) closeBtn.style.display = "none";
       });
     };
 
@@ -69,17 +80,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, isVisible, onClos
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
 
     if (isVisible) {
-      document.addEventListener('keydown', handleEsc);
+      document.addEventListener("keydown", handleEsc);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [isVisible, onClose]);
 
@@ -88,7 +99,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title, isVisible, onClos
   return (
     <Dialog open={isVisible} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl w-full p-0 overflow-hidden">
-        <div ref={containerRef} className="artplayer-app w-full aspect-video"></div>
+        <div
+          ref={containerRef}
+          className="artplayer-app w-full aspect-video"
+        ></div>
       </DialogContent>
     </Dialog>
   );

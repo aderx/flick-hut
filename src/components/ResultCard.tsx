@@ -6,10 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ResultCardProps } from "@/types";
+import { SearchVideoListItem } from "@/types";
+
+interface ResultCardProps {
+  item: SearchVideoListItem;
+  onClick: (item: SearchVideoListItem) => void;
+}
 
 const ResultCard: React.FC<ResultCardProps> = ({ item, onClick }) => {
-  const episode = item.videos ? item.videos.length : 0;
+  const episode = item.source ? item.source.length : 0;
 
   const handleImageError = (
     e: React.SyntheticEvent<HTMLImageElement, Event>
@@ -27,7 +32,7 @@ const ResultCard: React.FC<ResultCardProps> = ({ item, onClick }) => {
       <CardContent className="p-0 relative overflow-hidden rounded-t-lg">
         <img
           src={item.vod_pic}
-          alt={item.name}
+          alt={item.vod_name}
           onError={handleImageError}
           className="w-full h-64 object-cover group-hover:scale-110 transition-all duration-500"
         />
@@ -38,12 +43,13 @@ const ResultCard: React.FC<ResultCardProps> = ({ item, onClick }) => {
       </CardContent>
 
       <CardHeader className="px-4 pb-4">
-        <CardTitle className="truncate" title={item.name}>
-          {item.name}
+        <CardTitle className="truncate" title={item.vod_name}>
+          {item.vod_name}
         </CardTitle>
         <CardDescription className="flex justify-between">
-          <span>{item.source_name}</span>
-          <span>{item.resolution || "未知清晰度"}</span>
+          {/* TODO */}
+          <span>{item.type_name}</span>
+          <span>{item.vod_version || "未知清晰度"}</span>
         </CardDescription>
       </CardHeader>
     </Card>

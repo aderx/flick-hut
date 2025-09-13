@@ -1,12 +1,11 @@
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SearchFormProps } from "@/types";
+import React, { useState } from "react";
 import { toast } from "sonner";
-import { Avatar, AvatarImage } from "./ui/avatar";
-import { AvatarFallback } from "@radix-ui/react-avatar";
-import { LucideCircleUserRound } from "lucide-react";
 
+interface SearchFormProps {
+  onSearch: (keyword: string) => void;
+}
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   const [keyword, setKeyword] = useState("");
 
