@@ -31,6 +31,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
         onChange={(e) => setKeyword(e.target.value)}
         placeholder="请输入关键词..."
         className="h-14 md:text-xl rounded-full px-5"
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSubmit(e);
+          }
+        }}
       />
 
       <Button

@@ -38,10 +38,7 @@ export default function HomeClient() {
     try {
       const { base_urls } = await fetchApi<SiteConfig>("/api/config");
 
-      updateSearchPlatformList([
-        { name: "聚合", code: "_UNION_" },
-        ...base_urls,
-      ]);
+      updateSearchPlatformList(base_urls);
     } catch (e) {
       toast.error((e as any)?.message || e);
     }
@@ -224,21 +221,15 @@ export default function HomeClient() {
         <SearchForm onSearch={startSearch} />
         <PlatformList />
 
-        {/* {isStatusVisible && (
-          <div
-            id="status"
-            className="fixed top-3 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-lg shadow-lg z-50 text-lg font-medium whitespace-nowrap"
-          >
-            {statusMessage}
-          </div>
-        )} */}
-
         {tabs.map((tab, index) => (
           <div
             key={tab.name}
             style={{ display: activeTab === index ? "block" : "none" }}
           >
-            <div className="results-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-5">
+            <div
+              key={tab.name}
+              className="overflow-hidden px-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mt-10"
+            >
               {tab.results.map((item) => (
                 <ResultCard
                   key={`${item.name}-${item.source_name}`}

@@ -6,6 +6,10 @@ export function PlatformList() {
   const { searchPlatformList, selectedPlatform, setSelectedPlatform } =
     useSearchStore();
 
+  if (!searchPlatformList || searchPlatformList.length <= 1) {
+    return null;
+  }
+
   return (
     <ScrollArea className="mx-10 my-5 pb-2">
       <div className="flex">
