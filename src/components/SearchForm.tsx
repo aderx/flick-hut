@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { useMovieStore } from "@/store/movie";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
@@ -7,6 +9,7 @@ interface SearchFormProps {
   onSearch: (keyword: string) => void;
 }
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
+  const { isLoading, movieList } = useMovieStore();
   const [keyword, setKeyword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,7 +26,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="mx-10 my-5 flex gap-5">
+    <div
+      className={cn("mx-10 my-5 flex gap-5", {
+        "mt-[300px]": !movieList && !isLoading,
+      })}
+    >
       <Input
         type="text"
         value={keyword}

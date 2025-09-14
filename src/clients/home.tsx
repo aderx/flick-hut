@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 export default function HomeClient() {
   const { updateSearchPlatformList } = useSearchStore();
-  const { updateMovieList } = useMovieStore();
+  const { updateMovieList, setLoading } = useMovieStore();
   const [episodesModalVisible, setEpisodesModalVisible] = useState(false);
   const [selectedItemForEpisodes, setSelectedItemForEpisodes] =
     useState<SearchVideoListItem | null>(null);
@@ -46,6 +46,8 @@ export default function HomeClient() {
       eventSource.close();
     }
 
+    setLoading(true);
+
     // 使用新的API路由
     const url = `/api/search?keyword=${encodeURIComponent(keyword)}`;
     const newEventSource = new EventSource(url);
@@ -67,7 +69,7 @@ export default function HomeClient() {
     };
 
     newEventSource.onerror = () => {
-      toast("搜索完成");
+      setLoading(false);
       newEventSource.close();
     };
   };
