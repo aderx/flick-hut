@@ -1,18 +1,13 @@
 import { NextResponse } from "next/server";
 import { getConfig } from "../config/route";
-import { SourceData } from "@/types";
-import { SiteBasePlatformListItem, SiteConfig } from "@/types/config";
-
-interface Video {
-  name: string;
-  video_url: string;
-}
+import { SearchVideoSourceItem, SourceData, VideoMsg } from "@/types";
+import { SiteBasePlatformListItem } from "@/types/config";
 
 // 解析CMS数据
 function parseCmsData(
   sourceName: string,
   sourceCode: string,
-  cmsList: any[]
+  cmsList: VideoMsg[]
 ): SourceData {
   const results: SourceData["videoList"] = [];
 
@@ -21,7 +16,7 @@ function parseCmsData(
     // 我们只取第一个播放源
     const playUrlsStr = item.vod_play_url?.split("$$$")[0] || "";
 
-    const source: Video[] = [];
+    const source: SearchVideoSourceItem[] = [];
     // 视频列表以 '#' 分割
     const episodes = playUrlsStr.split("#");
     for (const episode of episodes) {
@@ -30,7 +25,7 @@ function parseCmsData(
       if (parts.length === 2) {
         const videoName = parts[0];
         const videoUrl = parts[1];
-        source.push({ name: videoName, video_url: videoUrl });
+        source.push({ name: videoName, url: videoUrl });
       }
     }
 
@@ -39,6 +34,8 @@ function parseCmsData(
       results.push({
         ...item,
         source: source,
+        platformCode: sourceCode,
+        platformName: sourceName,
       });
     }
   }
@@ -75,7 +72,6 @@ async function fetchAndProcess(
     const data = await response.json();
 
     if (data.code === 1 && data.list && data.list.length > 0) {
-      console.log(`成功: ${name}`);
       const result = parseCmsData(name, code, data.list);
       // 通过SSE发送结果
       const dataString = `data: ${JSON.stringify(result)}\n\n`;

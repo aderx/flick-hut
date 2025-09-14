@@ -9,8 +9,13 @@ export interface SourceData {
   videoList: SearchVideoListItem[];
 }
 
-export interface SearchVideoListItem {
+export interface SearchVideoListItem extends VideoMsg {
+  platformName: string;
+  platformCode: string;
   source: SearchVideoSourceItem[];
+}
+
+export interface VideoMsg {
   /** 视频封面 */
   vod_pic: string;
   /** 视频唯一标识符 */

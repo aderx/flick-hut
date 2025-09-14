@@ -11,14 +11,14 @@ import VideoPlayer from "@/components/VideoPlayer";
 import { fetchApi } from "@/lib/service";
 import { useMovieStore } from "@/store/movie";
 import { useSearchStore } from "@/store/search";
-import { SearchVideoListItem } from "@/types";
+import { SearchVideoListItem, SourceData } from "@/types";
 import { SiteConfig } from "@/types/config";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function HomeClient() {
   const { updateSearchPlatformList } = useSearchStore();
-  const { setMovieList } = useMovieStore();
+  const { updateMovieList } = useMovieStore();
   const [episodesModalVisible, setEpisodesModalVisible] = useState(false);
   const [selectedItemForEpisodes, setSelectedItemForEpisodes] =
     useState<SearchVideoListItem | null>(null);
@@ -33,9 +33,9 @@ export default function HomeClient() {
 
   const handleInit = async () => {
     try {
-      const { base_urls } = await fetchApi<SiteConfig>("/api/config");
+      const { platformList } = await fetchApi<SiteConfig>("/api/config");
 
-      updateSearchPlatformList(base_urls);
+      updateSearchPlatformList(platformList);
     } catch (e) {
       toast.error((e as any)?.message || e);
     }
@@ -52,21 +52,18 @@ export default function HomeClient() {
     setEventSource(newEventSource);
 
     newEventSource.onmessage = async (event) => {
-      const sourceData = JSON.parse(event.data);
-      if (!sourceData || !sourceData.result || sourceData.result.length === 0) {
+      const sourceData = JSON.parse(event.data) as SourceData;
+      if (
+        !sourceData ||
+        !sourceData.videoList ||
+        sourceData.videoList.length === 0
+      ) {
         return;
       }
 
-      const { name, result } = sourceData;
+      const { videoList } = sourceData;
 
-      setMovieList(
-        result.map((item: SearchVideoListItem) => ({
-          name: item.name,
-          coverUrl: item.vod_pic,
-          list: item.videos,
-          platform: name,
-        }))
-      );
+      updateMovieList(videoList);
     };
 
     newEventSource.onerror = () => {
@@ -76,7 +73,7 @@ export default function HomeClient() {
   };
 
   const showEpisodes = (item: SearchVideoListItem) => {
-    if (!item.videos || item.videos.length === 0) {
+    if (!item.source || item.source.length === 0) {
       toast("该项目没有可播放的视频源");
       // setIsStatusVisible(true);
       // setTimeout(() => {

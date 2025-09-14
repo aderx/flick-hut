@@ -1,22 +1,16 @@
+import { SearchVideoListItem } from "@/types";
 import { create } from "zustand";
 
-export interface MovieListItem {
-  name: string;
-  platform: string;
-  coverUrl: string;
-  resolution: string;
-  list: { name: string; url: string }[];
-}
-
 interface MovieStore {
-  movieList: MovieListItem[];
-  currentMovie?: MovieListItem;
-  setCurrentMovie: (movie: MovieListItem) => void;
-  setMovieList: (list: MovieListItem[]) => void;
+  movieList: SearchVideoListItem[];
+  currentMovie?: SearchVideoListItem;
+  setCurrentMovie: (movie: SearchVideoListItem) => void;
+  updateMovieList: (list: SearchVideoListItem[]) => void;
 }
 
 export const useMovieStore = create<MovieStore>((set) => ({
   movieList: [],
-  setMovieList: (list) => set({ movieList: list }),
+  updateMovieList: (list) =>
+    set((state) => ({ movieList: [...state.movieList, ...list] })),
   setCurrentMovie: (movie) => set({ currentMovie: movie }),
 }));
