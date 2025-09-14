@@ -95,7 +95,7 @@ export function DetailClient() {
 
         <VideoPlayer
           url={currentSource?.url || ""}
-          title={currentSource?.name || ""}
+          cover={currentMovie.vod_pic}
         />
 
         <div className="grid mx-5 md:mx-0 grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">

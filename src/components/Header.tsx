@@ -13,7 +13,7 @@ export function Header() {
 
         <p className="flex gap-1">
           <HistoryIcon />
-          历史记录
+          历史
         </p>
       </div>
     </header>

@@ -1,11 +1,12 @@
+import { Option } from "artplayer";
 import React, { useEffect, useRef } from "react";
 
 interface VideoPlayerProps {
   url: string;
-  title: string;
+  cover: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, cover }) => {
   const artRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,18 +33,23 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
         }
       };
 
-      const options: any = {
+      const options: Option = {
         container: containerRef.current,
-        url: url,
-        title: title,
+        url,
+        lang: "zh-cn",
+        poster: cover,
         autoplay: true,
         autoSize: false,
+        autoMini: true,
         setting: true,
         flip: true,
         playbackRate: true,
         aspectRatio: true,
         fullscreen: true,
         fullscreenWeb: true,
+        lock: true,
+        fastForward: true,
+        autoOrientation: true,
       };
 
       const lowerCaseUrl = url.toLowerCase();
@@ -52,6 +58,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
         options.customType = { m3u8: playM3u8 };
       }
 
+      artRef.current?.destroy();
       artRef.current = new (Artplayer as any)(options);
 
       artRef.current.on("ready", () => {
@@ -68,7 +75,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
         artRef.current = null;
       }
     };
-  }, [url, title]);
+  }, [url, cover]);
 
   return (
     <div ref={containerRef} className="w-full h-[40vh] md:h-[500px] my-10" />
