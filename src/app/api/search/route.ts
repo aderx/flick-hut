@@ -1,51 +1,8 @@
+import { getVodUrl } from "@/lib/get-vod-url";
+import { parseVodData } from "@/lib/parse-vod-data";
+import { SiteBasePlatformListItem } from "@/types/config";
 import { NextResponse } from "next/server";
 import { getConfig } from "../config/route";
-import { SearchVideoSourceItem, SourceData, VideoMsg } from "@/types";
-import { SiteBasePlatformListItem } from "@/types/config";
-
-// 解析CMS数据
-function parseCmsData(
-  sourceName: string,
-  sourceCode: string,
-  cmsList: VideoMsg[]
-): SourceData {
-  const results: SourceData["videoList"] = [];
-
-  for (const item of cmsList) {
-    // vod_play_url 的格式通常是 '播放源1$$$播放源2'
-    // 我们只取第一个播放源
-    const playUrlsStr = item.vod_play_url?.split("$$$")[0] || "";
-
-    const source: SearchVideoSourceItem[] = [];
-    // 视频列表以 '#' 分割
-    const episodes = playUrlsStr.split("#");
-    for (const episode of episodes) {
-      // 每一集是 '剧集名$播放链接'
-      const parts = episode.split("$");
-      if (parts.length === 2) {
-        const videoName = parts[0];
-        const videoUrl = parts[1];
-        source.push({ name: videoName, url: videoUrl });
-      }
-    }
-
-    // 只有当成功解析出视频时才添加该条目
-    if (source.length > 0) {
-      results.push({
-        ...item,
-        source: source,
-        platformCode: sourceCode,
-        platformName: sourceName,
-      });
-    }
-  }
-
-  return {
-    name: sourceName,
-    code: sourceCode,
-    videoList: results,
-  };
-}
 
 // 获取并处理单个API源的数据
 async function fetchAndProcess(
@@ -55,7 +12,7 @@ async function fetchAndProcess(
   stream: WritableStreamDefaultWriter
 ): Promise<void> {
   const { name, code, url } = source;
-  const sourceUrl = `${url}?ac=detail&wd=${encodeURIComponent(keyword)}`;
+  const sourceUrl = getVodUrl(url, { keyword });
 
   try {
     // console.log(`开始搜索: ${name} -> ${url}`);
@@ -72,7 +29,7 @@ async function fetchAndProcess(
     const data = await response.json();
 
     if (data.code === 1 && data.list && data.list.length > 0) {
-      const result = parseCmsData(name, code, data.list);
+      const result = parseVodData(name, code, data.list);
       // 通过SSE发送结果
       const dataString = `data: ${JSON.stringify(result)}\n\n`;
       const encoder = new TextEncoder();

@@ -34,3 +34,26 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+# TODO:
+
+平台相关：
+
+1. 支持选择单一平台进行检索
+2. 平台检索放到输入框后面
+3. 添加更多平台
+
+播放相关：
+
+1. 支持独立页面播放
+2. 切换集数
+3. 显示影视详情
+
+首页：
+
+1. 支持播放历史
+2. 支持收藏功能
+3. 支持搜索历史
+4. 优化内容区域空样式
+5. 搜索栏样式优化
+6. 搜索接口修改成普通 api，移除数据流

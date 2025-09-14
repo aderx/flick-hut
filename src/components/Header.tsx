@@ -5,7 +5,7 @@ export function Header() {
     <header className="w-full py-5 flex items-center justify-between border-b border-white/10 px-10">
       <h1 className="text-4xl font-bold">Flick Hut</h1>
 
-      <div className="flex gap-5">
+      <div className="flex gap-6">
         <p className="flex gap-1">
           <StarIcon />
           收藏
