@@ -6,7 +6,7 @@ export function parseVodData(
   sourceName: string,
   sourceCode: string,
   cmsList: VodDetailListItem[]
-): SourceData {
+): SourceData["videoList"] {
   const results: SourceData["videoList"] = [];
 
   for (const item of cmsList) {
@@ -38,9 +38,5 @@ export function parseVodData(
     }
   }
 
-  return {
-    name: sourceName,
-    code: sourceCode,
-    videoList: results,
-  };
+  return results;
 }

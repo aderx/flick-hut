@@ -1,18 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { fetchApi } from "@/lib/service";
 import { cn } from "@/lib/utils";
 import { useMovieStore } from "@/store/movie";
+import { SearchAPIRes } from "@/types/search";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-interface SearchFormProps {
-  onSearch: (keyword: string) => void;
-}
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
-  const { isLoading, movieList } = useMovieStore();
+const SearchForm = () => {
+  const { isLoading, movieList, setMovieList, setLoading } = useMovieStore();
   const [keyword, setKeyword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!keyword) {
@@ -20,17 +19,24 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       return;
     }
 
-    if (keyword.trim()) {
-      onSearch(keyword);
+    setLoading(true);
+
+    try {
+      const { searchList } = await fetchApi<SearchAPIRes>("/api/search", {
+        method: "post",
+        body: JSON.stringify({ keyword }),
+      });
+
+      setMovieList(searchList || []);
+    } catch (error) {
+      toast.error((error as any)?.message || error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      className={cn("mx-10 my-5 flex gap-5", {
-        "mt-[300px]": !movieList && !isLoading,
-      })}
-    >
+    <div className="mx-10 my-5 flex gap-5">
       <Input
         type="text"
         value={keyword}

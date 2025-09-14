@@ -1,20 +1,5 @@
+import { getConfig, updateConfig } from "@/lib/service/config";
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-import { SiteConfig } from "@/types/config";
-
-// 读取配置文件
-export function getConfig(): SiteConfig {
-  const configPath = path.join(process.cwd(), "config.json");
-  const rawData = fs.readFileSync(configPath, "utf-8");
-  return JSON.parse(rawData);
-}
-
-// 更新配置文件
-export function updateConfig(newConfig: SiteConfig): void {
-  const configPath = path.join(process.cwd(), "config.json");
-  fs.writeFileSync(configPath, JSON.stringify(newConfig, null, 4), "utf-8");
-}
 
 export async function GET() {
   try {

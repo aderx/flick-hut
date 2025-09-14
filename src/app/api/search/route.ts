@@ -1,97 +1,59 @@
-import { getVodUrl } from "@/lib/get-vod-url";
-import { parseVodData } from "@/lib/parse-vod-data";
-import { SiteBasePlatformListItem } from "@/types/config";
+import { getConfig } from "@/lib/service/config";
+import { getVodList } from "@/lib/service/get-Vod-list";
 import { NextResponse } from "next/server";
-import { getConfig } from "../config/route";
 
-// 获取并处理单个API源的数据
-async function fetchAndProcess(
-  source: SiteBasePlatformListItem,
-  keyword: string,
-  timeout: number,
-  stream: WritableStreamDefaultWriter
-): Promise<void> {
-  const { name, code, url } = source;
-  const sourceUrl = getVodUrl(url, { keyword });
-
-  try {
-    // console.log(`开始搜索: ${name} -> ${url}`);
-
-    // 设置超时
-    const response = await fetch(sourceUrl, {
-      signal: AbortSignal.timeout(timeout * 1000),
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      },
-    });
-
-    const data = await response.json();
-
-    if (data.code === 1 && data.list && data.list.length > 0) {
-      const result = parseVodData(name, code, data.list);
-      // 通过SSE发送结果
-      const dataString = `data: ${JSON.stringify(result)}\n\n`;
-      const encoder = new TextEncoder();
-      await stream.write(encoder.encode(dataString));
-    } else {
-      console.log(`数据为空或格式错误: ${name}, message: ${data.msg}`);
-    }
-  } catch (error) {
-    console.log(`请求或处理时发生错误: ${name}, 错误: ${error}`);
-  }
-}
-
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const keyword = searchParams.get("keyword");
+export async function POST(request: Request) {
+  const { keyword, platformCodeList } = (await request.json()) as {
+    keyword: string;
+    platformCodeList: string[];
+  };
 
   if (!keyword) {
     return NextResponse.json({ error: "keyword is required" }, { status: 400 });
   }
 
-  // 创建可读流
-  const stream = new TransformStream();
-  const writer = stream.writable.getWriter();
-  const encoder = new TextEncoder();
+  const config = getConfig();
+  let sourceList = config.platformList;
 
-  // 设置响应头
-  const headers = {
-    "Content-Type": "text/event-stream",
-    "Cache-Control": "no-cache",
-    Connection: "keep-alive",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  };
+  if (platformCodeList) {
+    const findSouceList = platformCodeList
+      .map((code) => sourceList.find((item) => item.code === code))
+      .filter(Boolean) as typeof sourceList;
 
-  // 异步处理搜索请求
-  (async () => {
-    try {
-      const config = getConfig();
-      const sources = config.platformList;
-      const timeout = config.timeout;
-
-      // 并行处理所有源
-      const promises = sources.map((source) =>
-        fetchAndProcess(source, keyword, timeout || 5, writer)
+    if (findSouceList.length === 0) {
+      return NextResponse.json(
+        { error: "数据异常，平台码无效" },
+        { status: 400 }
       );
-
-      await Promise.all(promises);
-
-      // 结束响应
-      await writer.close();
-    } catch (error) {
-      console.error("Search error:", error);
-      const errorString = `data: ${JSON.stringify({
-        error: "搜索过程中发生错误",
-      })}\n\n`;
-      await writer.write(encoder.encode(errorString));
-      await writer.close();
     }
-  })();
 
-  return new NextResponse(stream.readable, { headers });
+    sourceList = findSouceList;
+  }
+
+  try {
+    // 并行处理所有源
+    const promises = sourceList.map(async (source) => {
+      try {
+        return await getVodList({
+          platfromCode: source.code,
+          vodParams: { keyword },
+        });
+      } catch (e) {
+        console.log("资源请求失败", { e, source, keyword });
+        return [];
+      }
+    });
+
+    const res = await Promise.all(promises);
+    const searchList = res.flat(1).filter(Boolean);
+
+    return NextResponse.json({ message: "检索完成", searchList });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to retrieve data" },
+      { status: 500 }
+    );
+  }
 }
 
 // 处理预检请求
