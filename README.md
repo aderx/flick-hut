@@ -45,9 +45,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 播放相关：
 
-1. 支持独立页面播放
-2. 切换集数
-3. 显示影视详情
+1. 支持独立页面播放 ✅
+2. 切换集数 ✅
+3. 显示影视详情 ❌
 
 首页：
 
@@ -56,4 +56,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 3. 支持搜索历史
 4. 优化内容区域空样式
 5. 搜索栏样式优化
-6. 搜索接口修改成普通 api，移除数据流
+6. 搜索接口修改成普通 api，移除数据流 ✅

@@ -70,7 +70,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
     };
   }, [url, title]);
 
-  return <div ref={containerRef} className="w-full h-[600px] my-10" />;
+  return (
+    <div ref={containerRef} className="w-full h-[40vh] md:h-[500px] my-10" />
+  );
 };
 
 export default VideoPlayer;
