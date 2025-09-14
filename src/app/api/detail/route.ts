@@ -1,11 +1,10 @@
 import { getConfig } from "@/lib/service/config";
 import { getVodList } from "@/lib/service/get-Vod-list";
+import { DetailAPIReq } from "@/types/detail";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const platformCode = searchParams.get("platformCode");
-  const videoId = searchParams.get("videoId");
+  const { platformCode, videoId } = (await request.json()) as DetailAPIReq;
 
   if (!platformCode) {
     return NextResponse.json(

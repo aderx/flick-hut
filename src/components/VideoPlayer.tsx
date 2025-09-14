@@ -1,25 +1,17 @@
 import React, { useEffect, useRef } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface VideoPlayerProps {
   url: string;
   title: string;
-  isVisible: boolean;
-  onClose: () => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({
-  url,
-  title,
-  isVisible,
-  onClose,
-}) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, title }) => {
   const artRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initArtPlayer = async () => {
-      if (!isVisible || !url || !containerRef.current) return;
+      if (!url || !containerRef.current) return;
 
       // 动态导入ArtPlayer以避免SSR问题
       const Artplayer = (await import("artplayer")).default;
@@ -76,36 +68,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         artRef.current = null;
       }
     };
-  }, [isVisible, url, title]);
+  }, [url, title]);
 
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    if (isVisible) {
-      document.addEventListener("keydown", handleEsc);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEsc);
-    };
-  }, [isVisible, onClose]);
-
-  if (!isVisible) return null;
-
-  return (
-    <Dialog open={isVisible} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl w-full p-0 overflow-hidden">
-        <div
-          ref={containerRef}
-          className="artplayer-app w-full aspect-video"
-        ></div>
-      </DialogContent>
-    </Dialog>
-  );
+  return <div ref={containerRef} className="w-full h-[600px] my-10" />;
 };
 
 export default VideoPlayer;

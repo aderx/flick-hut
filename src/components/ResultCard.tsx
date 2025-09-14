@@ -28,31 +28,35 @@ const ResultCard: React.FC<ResultCardProps> = ({ item, onClick }) => {
   }
 
   return (
-    <Card className="cursor-pointer p-0 group" onClick={() => onClick(item)}>
-      <CardContent className="p-0 relative overflow-hidden rounded-t-lg">
-        <img
-          src={item.vod_pic}
-          alt={item.vod_name}
-          onError={handleImageError}
-          className="w-full h-64 object-cover group-hover:scale-110 transition-all duration-500"
-        />
+    <a
+      href={`/detail?code=${item.platformCode}&id=${item.vod_id}`}
+      target="_blank"
+    >
+      <Card className="cursor-pointer p-0 group" onClick={() => onClick(item)}>
+        <CardContent className="p-0 relative overflow-hidden rounded-t-lg">
+          <img
+            src={item.vod_pic}
+            alt={item.vod_name}
+            onError={handleImageError}
+            className="w-full h-64 object-cover group-hover:scale-110 transition-all duration-500"
+          />
 
-        <div className="episode-count absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-          共 {episode} 集
-        </div>
-      </CardContent>
+          <div className="episode-count absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+            共 {episode} 集
+          </div>
+        </CardContent>
 
-      <CardHeader className="px-4 pb-4">
-        <CardTitle className="truncate" title={item.vod_name}>
-          {item.vod_name}
-        </CardTitle>
-        <CardDescription className="flex justify-between">
-          {/* TODO */}
-          <span>{item.type_name}</span>
-          <span>{item.vod_version || "未知清晰度"}</span>
-        </CardDescription>
-      </CardHeader>
-    </Card>
+        <CardHeader className="px-4 pb-4">
+          <CardTitle className="truncate" title={item.vod_name}>
+            {item.vod_name}
+          </CardTitle>
+          <CardDescription className="flex justify-between">
+            <span>{item.vod_lang}</span>
+            <span>{item.vod_version || "未知清晰度"}</span>
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    </a>
   );
 };
 

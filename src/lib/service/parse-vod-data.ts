@@ -1,4 +1,4 @@
-import { SearchVideoSourceItem, SourceData } from "@/types";
+import { SearchVideoListItem, SearchVideoSourceItem } from "@/types";
 import { VodDetailListItem } from "@/types/vod-detail";
 
 // 解析CMS数据
@@ -6,8 +6,8 @@ export function parseVodData(
   sourceName: string,
   sourceCode: string,
   cmsList: VodDetailListItem[]
-): SourceData["videoList"] {
-  const results: SourceData["videoList"] = [];
+): SearchVideoListItem[] {
+  const results: SearchVideoListItem[] = [];
 
   for (const item of cmsList) {
     // vod_play_url 的格式通常是 '播放源1$$$播放源2'

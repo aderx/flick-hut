@@ -1,12 +1,10 @@
 import { getConfig } from "@/lib/service/config";
 import { getVodList } from "@/lib/service/get-Vod-list";
+import { SearchAPIReq } from "@/types/search";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const { keyword, platformCodeList } = (await request.json()) as {
-    keyword: string;
-    platformCodeList: string[];
-  };
+  const { keyword, platformCodeList } = (await request.json()) as SearchAPIReq;
 
   if (!keyword) {
     return NextResponse.json({ error: "keyword is required" }, { status: 400 });
