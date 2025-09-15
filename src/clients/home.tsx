@@ -35,7 +35,6 @@ export default function HomeClient() {
       <div className="absolute inset-0">
         <Header />
         <SearchForm />
-        <PlatformList />
         <MoveList />
       </div>
     </div>

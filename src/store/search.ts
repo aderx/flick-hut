@@ -1,28 +1,29 @@
 import { create } from "zustand";
 
-export const defaultPlatform = {
-  name: "聚合",
-  code: "_UNION_",
-};
-
 interface SearchStore {
   searchPlatformList: { name: string; code: string }[];
-  selectedPlatform?: string;
+  selectedPlatformMap: { [code in string]?: { name: string; code: string } };
   updateSearchPlatformList: (
     newPlatformList: { name: string; code: string }[]
   ) => void;
-  setSelectedPlatform: (platform: string) => void;
+  updateSelectedPlatformMap: (platform: {
+    [code in string]?: { name: string; code: string };
+  }) => void;
+  setSelectedPlatformMap: (map: {
+    [code in string]?: { name: string; code: string };
+  }) => void;
 }
 
 export const useSearchStore = create<SearchStore>((set) => ({
-  searchPlatformList: [defaultPlatform],
-  updateSearchPlatformList: (list) => {
-    const newList = [defaultPlatform, ...list];
-
+  searchPlatformList: [],
+  selectedPlatformMap: {},
+  updateSearchPlatformList: (list) => set({ searchPlatformList: list }),
+  updateSelectedPlatformMap: (platform) =>
     set((state) => ({
-      searchPlatformList: newList,
-      selectedPlatform: state.selectedPlatform || newList[0].code,
-    }));
-  },
-  setSelectedPlatform: (platform) => set({ selectedPlatform: platform }),
+      selectedPlatformMap: {
+        ...(state?.selectedPlatformMap || {}),
+        ...platform,
+      },
+    })),
+  setSelectedPlatformMap: (map) => set({ selectedPlatformMap: map }),
 }));
