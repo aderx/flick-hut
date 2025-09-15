@@ -39,8 +39,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 平台相关：
 
-1. 支持选择单一平台进行检索
-2. 平台检索放到输入框后面
+1. 支持选择单一平台进行检索 ✅
+2. 平台检索放到输入框后面 ✅
 3. 添加更多平台
 
 播放相关：
@@ -55,5 +55,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 2. 支持收藏功能
 3. 支持搜索历史
 4. 优化内容区域空样式
-5. 搜索栏样式优化
-6. 搜索接口修改成普通 api，移除数据流 ✅
+5. 搜索接口修改成普通 api，移除数据流 ✅

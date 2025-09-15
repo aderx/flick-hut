@@ -4,13 +4,19 @@ import { fetchApi } from "@/lib/service";
 import { cn } from "@/lib/utils";
 import { useMovieStore } from "@/store/movie";
 import { SearchAPIRes } from "@/types/search";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PlatformList } from "./PlatformList";
+import { useSearchStore } from "@/store/search";
 
 const SearchForm = () => {
-  const { isLoading, movieList, setMovieList, setLoading } = useMovieStore();
+  const { selectedPlatformMap } = useSearchStore();
+  const { setMovieList, setLoading } = useMovieStore();
   const [keyword, setKeyword] = useState("");
+
+  const selctedPlatformList = useMemo(() => {
+    return Object.values(selectedPlatformMap).filter(Boolean);
+  }, [selectedPlatformMap]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +31,10 @@ const SearchForm = () => {
     try {
       const { searchList } = await fetchApi<SearchAPIRes>("/api/search", {
         method: "post",
-        body: JSON.stringify({ keyword }),
+        body: JSON.stringify({
+          keyword,
+          platformCodeList: selctedPlatformList.map((item) => item?.code),
+        }),
       });
 
       setMovieList(searchList || []);
