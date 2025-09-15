@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const config = getConfig();
   let sourceList = config.platformList;
 
-  if (platformCodeList) {
+  if (platformCodeList && platformCodeList.length > 0) {
     const findSouceList = platformCodeList
       .map((code) => sourceList.find((item) => item.code === code))
       .filter(Boolean) as typeof sourceList;
