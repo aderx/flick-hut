@@ -1,6 +1,7 @@
 "use client";
 
-import Aurora from "@/components/Aurora";
+import Aurora from "@/components/effects/Aurora";
+import { Dither } from "@/components/effects/Dither";
 import { Header } from "@/components/Header";
 import { MoveList } from "@/components/MoveList";
 import { PlatformList } from "@/components/PlatformList";
@@ -30,7 +31,7 @@ export default function HomeClient() {
 
   return (
     <div className="w-screen h-screen">
-      <Aurora colorStops={["#7cff67", "#b19eef", "#5227ff"]} />
+      <Dither />
 
       <div className="absolute inset-0">
         <Header />
