@@ -103,8 +103,18 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
     let maxScale = 0;
     const rawValues: number[] = [];
 
+    // 使用Proxy包装mouseRef.current以检测是否在fragment中使用了鼠标参数
+    const mouseProxy = new Proxy(mouseRef.current, {
+      get(target, prop: string | symbol) {
+        return target[prop as keyof typeof target];
+      },
+    });
+
     // Fragment shader function from liquid-glass.tsx
-    const fragment = (uv: { x: number; y: number }) => {
+    const fragment = (
+      uv: { x: number; y: number },
+      mouse?: { x: number; y: number }
+    ) => {
       const ix = uv.x - 0.5;
       const iy = uv.y - 0.5;
       const distanceToEdge = roundedRectSDF(ix, iy, 0.3, 0.2, 0.6);
@@ -116,7 +126,7 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
     for (let i = 0; i < data.length; i += 4) {
       const x = (i / 4) % w;
       const y = Math.floor(i / 4 / w);
-      const pos = fragment({ x: x / w, y: y / h });
+      const pos = fragment({ x: x / w, y: y / h }, mouseProxy);
       const dx = pos.x * w - x;
       const dy = pos.y * h - y;
       maxScale = Math.max(maxScale, Math.abs(dx), Math.abs(dy));
@@ -204,6 +214,8 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
       if (container) {
         container.style.left = newPos.x + "px";
         container.style.top = newPos.y + "px";
+        // 移除transform属性以使用绝对定位
+        container.style.transform = "none";
       }
 
       // Update mouse position for shader
@@ -217,10 +229,10 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
 
     function onMouseUp() {
       dragRef.current.isDragging = false;
-      if (container) container.style.cursor = "grab";
-
-      // 更新状态以保持一致性
       if (container) {
+        container.style.cursor = "grab";
+        // 确保移除transform属性
+        container.style.transform = "none";
         const rect = container.getBoundingClientRect();
         setPosition({ x: rect.left, y: rect.top });
       }
@@ -245,14 +257,16 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
   // Style for container div
   const containerStyle: React.CSSProperties = {
     position: "fixed",
-    // 移除top和left，因为我们会直接通过DOM操作设置
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
     width,
     height,
     overflow: "hidden",
     borderRadius:
       typeof borderRadius === "number" ? `${borderRadius}px` : borderRadius,
-    backdropFilter: `blur(${blur}px) brightness(${brightness}) saturate(${saturate}) url(#${id}_filter)`,
-    WebkitBackdropFilter: `brightness(${brightness}) saturate(${saturate})`,
+    backdropFilter: `blur(${blur}px) brightness(${brightness}) saturate(${saturate}) contrast(1.2) url(#${id}_filter)`,
+    WebkitBackdropFilter: `brightness(${brightness}) saturate(${saturate}) contrast(1.2)`,
     boxShadow:
       "0 4px 8px rgba(0, 0, 0, 0.25), 0 -10px 25px inset rgba(0, 0, 0, 0.15)",
     cursor: "grab",
