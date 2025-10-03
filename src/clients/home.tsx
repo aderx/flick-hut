@@ -1,10 +1,9 @@
 "use client";
 
-import Aurora from "@/components/effects/Aurora";
 import { Dither } from "@/components/effects/Dither";
+import { LiquidGlass } from "@/components/effects/LiquidGlass";
 import { Header } from "@/components/Header";
 import { MoveList } from "@/components/MoveList";
-import { PlatformList } from "@/components/PlatformList";
 import SearchForm from "@/components/SearchForm";
 import { fetchApi } from "@/lib/service";
 import { useSearchStore } from "@/store/search";
@@ -31,10 +30,12 @@ export default function HomeClient() {
 
   return (
     <div className="w-screen h-screen">
+      <LiquidGlass width={300} height={200} />
       <Dither />
 
       <div className="absolute inset-0">
         <Header />
+
         <SearchForm />
         <MoveList />
       </div>
