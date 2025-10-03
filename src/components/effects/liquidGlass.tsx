@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 
 interface LiquidGlassProps {
@@ -5,6 +7,7 @@ interface LiquidGlassProps {
   height?: number;
   borderRadius?: number | string;
   brightness?: number;
+  blur?: number;
   saturate?: number;
   className?: string;
   style?: React.CSSProperties;
@@ -50,8 +53,9 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
   width = 300,
   height = 200,
   borderRadius = 150,
-  brightness = 1.05,
+  brightness = 1.1,
   saturate = 1.1,
+  blur = 0.25,
   className,
   style,
   children,
@@ -86,9 +90,9 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
   const updateShader = () => {
     const canvas = canvasRef.current;
     const svg = svgRef.current;
-    
+
     if (!canvas || !svg) return;
-    
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -132,17 +136,21 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
     }
 
     ctx.putImageData(new ImageData(data, w, h), 0, 0);
-    
+
     // Update the feImage href
     const feImage = svg.querySelector(`#${id}_map`);
     if (feImage) {
-      feImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", canvas.toDataURL());
+      feImage.setAttributeNS(
+        "http://www.w3.org/1999/xlink",
+        "href",
+        canvas.toDataURL()
+      );
     }
-    
+
     // Update scale
     const feDisplacementMap = svg.querySelector(`#${id}_displacement`);
     if (feDisplacementMap) {
-      feDisplacementMap.setAttribute("scale", (maxScale).toString());
+      feDisplacementMap.setAttribute("scale", maxScale.toString());
     }
   };
 
@@ -191,13 +199,13 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
       const newX = dragRef.current.initialX + deltaX;
       const newY = dragRef.current.initialY + deltaY;
       const newPos = constrainPosition(newX, newY);
-      
+
       // 直接设置元素位置
       if (container) {
         container.style.left = newPos.x + "px";
         container.style.top = newPos.y + "px";
       }
-      
+
       // Update mouse position for shader
       if (container) {
         const rect = container.getBoundingClientRect();
@@ -210,7 +218,7 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
     function onMouseUp() {
       dragRef.current.isDragging = false;
       if (container) container.style.cursor = "grab";
-      
+
       // 更新状态以保持一致性
       if (container) {
         const rect = container.getBoundingClientRect();
@@ -243,7 +251,7 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
     overflow: "hidden",
     borderRadius:
       typeof borderRadius === "number" ? `${borderRadius}px` : borderRadius,
-    backdropFilter: `brightness(${brightness}) saturate(${saturate}) url(#${id}_filter)`,
+    backdropFilter: `blur(${blur}px) brightness(${brightness}) saturate(${saturate}) url(#${id}_filter)`,
     WebkitBackdropFilter: `brightness(${brightness}) saturate(${saturate})`,
     boxShadow:
       "0 4px 8px rgba(0, 0, 0, 0.25), 0 -10px 25px inset rgba(0, 0, 0, 0.15)",
@@ -269,26 +277,22 @@ export const LiquidGlass: React.FC<LiquidGlassProps> = ({
         }}
       >
         <defs>
-          <filter 
-            id={`${id}_filter`} 
+          <filter
+            id={`${id}_filter`}
             filterUnits="userSpaceOnUse"
             colorInterpolationFilters="sRGB"
-            x="0" 
-            y="0" 
-            width={width} 
+            x="0"
+            y="0"
+            width={width}
             height={height}
           >
-            <feImage 
-              id={`${id}_map`} 
-              width={width} 
-              height={height} 
-            />
-            <feDisplacementMap 
+            <feImage id={`${id}_map`} width={width} height={height} />
+            <feDisplacementMap
               id={`${id}_displacement`}
-              in="SourceGraphic" 
-              in2={`${id}_map`} 
-              xChannelSelector="R" 
-              yChannelSelector="G" 
+              in="SourceGraphic"
+              in2={`${id}_map`}
+              xChannelSelector="R"
+              yChannelSelector="G"
             />
           </filter>
         </defs>

@@ -34,7 +34,7 @@ export default function HomeClient() {
       <Dither />
 
       <div className="absolute inset-0">
-        <Header />
+        {/* <Header /> */}
 
         <SearchForm />
         <MoveList />

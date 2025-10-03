@@ -8,6 +8,7 @@ import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PlatformList } from "./PlatformList";
 import { useSearchStore } from "@/store/search";
+import { CircleArrowRight } from "lucide-react";
 
 const SearchForm = () => {
   const { selectedPlatformMap } = useSearchStore();
@@ -62,6 +63,7 @@ const SearchForm = () => {
         />
 
         <PlatformList />
+        <CircleArrowRight />
       </div>
 
       <Button
